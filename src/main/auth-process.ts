@@ -1,40 +1,39 @@
-import { BrowserWindow } from "electron";
+import { BrowserWindow } from 'electron'
 
-let authWindow: BrowserWindow | null = null;
+let authWindow: BrowserWindow | null = null
 
-export function createAuthWindow(authUrl: string, callback: () => void) : void {
-    destroyAuthWin();
+export function createAuthWindow(authUrl: string, callback: () => void): void {
+  destroyAuthWin()
 
-    authWindow = new BrowserWindow({
-        width: 1000,
-        height: 600,
-        webPreferences: {
-          nodeIntegration: false,
-        }
-    });
-
-    authWindow.loadURL(authUrl);
-
-    const {
-        session: { webRequest } 
-      } = authWindow.webContents;
-      const filter = {
-        urls: ['http://localhost/keycloak-redirect*']
+  authWindow = new BrowserWindow({
+    width: 1000,
+    height: 600,
+    webPreferences: {
+      nodeIntegration: false
     }
+  })
 
-    webRequest.onBeforeRequest(filter, async ({}) => {
-        callback();
-        return destroyAuthWin();
-      });
+  authWindow.loadURL(authUrl)
 
-      authWindow.on('closed', () => {
-        authWindow = null;
-      });
+  const {
+    session: { webRequest }
+  } = authWindow.webContents
+  const filter = {
+    urls: ['http://localhost/keycloak-redirect*']
+  }
+
+  webRequest.onBeforeRequest(filter, async () => {
+    callback()
+    return destroyAuthWin()
+  })
+
+  authWindow.on('closed', () => {
+    authWindow = null
+  })
 }
 
-
-function destroyAuthWin() {
-    if (!authWindow) return;
-    authWindow.close();
-    authWindow = null;
+function destroyAuthWin(): void {
+  if (!authWindow) return
+  authWindow.close()
+  authWindow = null
 }

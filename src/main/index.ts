@@ -3,11 +3,12 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { createAuthWindow } from './auth-process'
-import { autoUpdater, UpdateInfo } from 'electron-updater';
+import { autoUpdater, UpdateInfo } from 'electron-updater'
+require('dotenv').config()
 
 let mainWindow: BrowserWindow
 
-function handleCheckSso() {
+function handleCheckSso(): void {
   const {
     session: { webRequest }
   } = mainWindow.webContents
@@ -24,11 +25,11 @@ function handleCheckSso() {
         : `file://${join(__dirname, '../renderer/index.html')}`
 
     // Handle logout request
-    if(!params.includes('state')) {
-     return mainWindow.reload();
+    if (!params.includes('state')) {
+      return mainWindow.reload()
     }
 
-    mainWindow.loadURL(`${baseUrl}${params}`);
+    mainWindow.loadURL(`${baseUrl}${params}`)
   })
 }
 
@@ -47,9 +48,9 @@ function createWindow(): void {
       nodeIntegration: false,
       webSecurity: false
     }
-  });
+  })
 
-  handleCheckSso();
+  handleCheckSso()
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
@@ -70,8 +71,8 @@ function createWindow(): void {
 }
 
 // Auto update flags
-autoUpdater.autoDownload = false;
-autoUpdater.autoInstallOnAppQuit = true;
+autoUpdater.autoDownload = false
+autoUpdater.autoInstallOnAppQuit = true
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -88,18 +89,18 @@ app.whenReady().then(() => {
   })
 
   // IPC test
-  ipcMain.on('ping', () => console.log('pong'));
+  ipcMain.on('ping', () => console.log('pong'))
 
   ipcMain.handle('app:version', () => {
-    return app.getVersion();
-  });
+    return app.getVersion()
+  })
 
   ipcMain.handle('keycloak:login', (_, url: string) => {
     createAuthWindow(url, () => {
-      handleCheckSso();
+      handleCheckSso()
       mainWindow.reload()
     })
-  });
+  })
 
   createWindow()
 
@@ -115,59 +116,60 @@ app.whenReady().then(() => {
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
-  });
+    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+  })
 
-  autoUpdater.checkForUpdatesAndNotify();
-});
+  autoUpdater.checkForUpdatesAndNotify()
+})
 
 autoUpdater.on('checking-for-update', () => {
-  console.log('Checking for update');
+  console.log('Checking for update')
   dialog.showMessageBox({
     type: 'info',
     title: 'Update Available',
-    message: 'Checking for updates',
-  });
-});
+    message: 'Checking for updates'
+  })
+})
 
 autoUpdater.on('update-not-available', (_info: UpdateInfo) => {
   dialog.showMessageBox({
     type: 'info',
     title: 'No Update Available',
     message: `No new update. Version ${_info.version}, Files: ${_info.files.toString()}, Release name ${_info.releaseName}`
-  });
-});
-
+  })
+})
 
 autoUpdater.on('update-available', (_info: UpdateInfo) => {
-  dialog.showMessageBox({
-    type: 'info',
-    title: 'Update Available',
-    message: `NEW UPDATE DETECTED. Version ${_info.version}, Files: ${_info.files.toString()}, Release name ${_info.releaseName}`
-  }).then((returnValue) => {
-    if(returnValue.response === 0) autoUpdater.downloadUpdate();
+  dialog
+    .showMessageBox({
+      type: 'info',
+      title: 'Update Available',
+      message: `NEW UPDATE DETECTED. Version ${_info.version}, Files: ${_info.files.toString()}, Release name ${_info.releaseName}`
+    })
+    .then((returnValue) => {
+      if (returnValue.response === 0) autoUpdater.downloadUpdate()
+    })
+})
 
-  });
+autoUpdater.on('update-downloaded', () => {
+  dialog
+    .showMessageBox({
+      type: 'info',
+      title: 'Update downloaded',
+      message: `Update downloaded`
+    })
+    .then((returnValue) => {
+      if (returnValue.response === 0) autoUpdater.quitAndInstall()
+    })
+})
 
-});
-
-autoUpdater.on("update-downloaded", (_info) => {
-  dialog.showMessageBox({
-    type: 'info',
-    title: 'Update downloaded',
-    message: `Update downloaded`
-  }).then((returnValue) => {
-    if(returnValue.response === 0) autoUpdater.quitAndInstall();
-  });;  
-});
-
-autoUpdater.on("error", (info) => {
+autoUpdater.on('error', (info) => {
   dialog.showMessageBox({
     type: 'error',
     title: 'Update Error',
-    message: `Error: ${info}`,
-  });
-});
+    message: `Error: ${info}`
+  })
+})
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
