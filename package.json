@@ -22,12 +22,14 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^3.0.0",
+    "@patternfly/patternfly": "^4.224.5",
     "@tanstack/react-query": "^5.56.2",
     "axios": "^1.7.7",
     "dotenv": "^16.5.0",
     "electron-updater": "^6.1.7",
     "jwt-decode": "^4.0.0",
-    "keycloak-js": "^25.0.4"
+    "keycloak-js": "^25.0.4",
+    "patternfly": "^3.59.5"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^2.0.0",
